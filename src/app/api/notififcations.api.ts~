@@ -1,0 +1,50 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+export type Audience = 'CITIZEN'|'ADMIN';
+export type Status = 'NEW'|'READ';
+export type Type =
+  | 'PROGRAM_ACTIVATED'
+  | 'ENROLLMENT_REQUESTED'
+  | 'ENROLLMENT_ACCEPTED'
+  | 'ENROLLMENT_REJECTED'
+  | 'PAYMENT_DISPATCHED';
+
+export interface NotificationItem {
+  id: number;
+  audience: Audience;
+  username?: string | null;
+  type: Type;
+  title: string;
+  message: string;
+  status: Status;
+  createdAt: string;
+  payload?: string | null;
+}
+
+@Injectable({ providedIn: 'root' })
+export class NotificationsApi {
+  constructor(private http: HttpClient) {}
+
+  listMine(params?: { audience?: Audience; status?: Status; limit?: number; offset?: number }) {
+    const q = new URLSearchParams();
+    if (params?.audience) q.set('audience', params.audience);
+    if (params?.status) q.set('status', params.status);
+    if (params?.limit != null) q.set('limit', String(params.limit));
+    if (params?.offset != null) q.set('offset', String(params.offset));
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.http.get<NotificationItem[]>(`/notifications/me${qs}`);
+  }
+
+  countMine(params?: { audience?: Audience; status?: Status }) {
+    const q = new URLSearchParams();
+    if (params?.audience) q.set('audience', params.audience);
+    if (params?.status) q.set('status', params.status);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.http.get<number>(`/notifications/me/count${qs}`);
+  }
+
+  markRead(id: number) {
+    return this.http.patch<void>(`/notifications/${id}/read`, {});
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "/auth":         { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/profiles":     { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/admin/profiles": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/enrollments":  { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/programs":     { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/cycles":       { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/entitlements": { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/payments":     { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/notifications":{ "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" },
+  "/actuator":     { "target": "http://localhost:8080", "secure": false, "changeOrigin": true, "logLevel": "debug" }
+}

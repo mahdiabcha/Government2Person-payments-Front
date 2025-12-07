@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e3d9782a-fcb8-4625-850a-d0f46316fabb" name="Changes" comment="css" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;mahdiabcha&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/mahdiabcha/g2p-portal.git&quot;,
+    &quot;accountId&quot;: &quot;698830a9-9635-4da7-b1a8-9ef3d22c3c67&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="32KIPeHHYyf4kb6Yxrmqa5jLZIW" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/dev/g2p-portal&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\dev\\g2p-portal\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\dev\g2p-portal\src\app\shared" />
+      <recent name="C:\dev\g2p-portal\src\app\admin\cycles" />
+      <recent name="C:\dev\g2p-portal\src\app\citizen" />
+      <recent name="C:\dev\g2p-portal" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.Angular CLI Server">
+    <configuration name="Angular Application" type="JavascriptDebugType" uri="http://localhost:4200">
+      <method v="2" />
+    </configuration>
+    <configuration name="Angular CLI Server" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="start" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23339.15" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e3d9782a-fcb8-4625-850a-d0f46316fabb" name="Changes" comment="" />
+      <created>1757162816299</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1757162816299</updated>
+      <workItem from="1757162818186" duration="78000" />
+      <workItem from="1757162913358" duration="5524000" />
+      <workItem from="1757253565110" duration="4334000" />
+      <workItem from="1757500550220" duration="18879000" />
+      <workItem from="1757590614973" duration="6259000" />
+      <workItem from="1757705950281" duration="1871000" />
+      <workItem from="1757857064148" duration="8436000" />
+      <workItem from="1757875055314" duration="7037000" />
+      <workItem from="1757962960597" duration="1004000" />
+      <workItem from="1758106025029" duration="6501000" />
+      <workItem from="1758362599807" duration="23214000" />
+      <workItem from="1758492855502" duration="7268000" />
+      <workItem from="1758567176609" duration="8902000" />
+      <workItem from="1758640125480" duration="9902000" />
+      <workItem from="1758707460248" duration="9844000" />
+      <workItem from="1758970346342" duration="726000" />
+      <workItem from="1758984070427" duration="1350000" />
+      <workItem from="1759081881620" duration="603000" />
+      <workItem from="1759783280945" duration="756000" />
+      <workItem from="1759833559985" duration="11000" />
+      <workItem from="1759946429055" duration="115000" />
+      <workItem from="1759946554526" duration="624000" />
+      <workItem from="1760025862430" duration="545000" />
+      <workItem from="1761035234669" duration="22000" />
+      <workItem from="1761036103979" duration="453000" />
+      <workItem from="1764230745320" duration="248000" />
+      <workItem from="1765109554541" duration="6000" />
+    </task>
+    <task id="LOCAL-00001" summary=" fixed bugs">
+      <option name="closed" value="true" />
+      <created>1757540447836</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1757540447836</updated>
+    </task>
+    <task id="LOCAL-00002" summary="notif">
+      <option name="closed" value="true" />
+      <created>1758751408404</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1758751408404</updated>
+    </task>
+    <task id="LOCAL-00003" summary="css">
+      <option name="closed" value="true" />
+      <created>1758752811000</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1758752811000</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value=" fixed bugs" />
+    <MESSAGE value="notif" />
+    <MESSAGE value="css" />
+    <option name="LAST_COMMIT_MESSAGE" value="css" />
+  </component>
+</project>

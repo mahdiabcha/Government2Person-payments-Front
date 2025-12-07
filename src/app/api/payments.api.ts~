@@ -1,0 +1,31 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+export type BatchStatus = 'PENDING'|'PROCESSING'|'COMPLETED'|'FAILED';
+export type InstructionStatus = 'PENDING'|'SENT'|'SUCCESS'|'FAILED';
+
+export interface PaymentBatch {
+  id: number; programId?: number; cycleId?: number;
+  createdAt?: string; createdBy?: string;
+  status: BatchStatus; totalCount: number; successCount: number; failedCount: number;
+}
+export interface PaymentInstruction {
+  id: number; batchId: number; beneficiaryUsername: string;
+  amount: number; currency: string;
+  status: InstructionStatus; bankRef?: string; failReason?: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class PaymentsApi {
+  constructor(private http: HttpClient) {}
+
+  createManualBatch(body: { programId: number; amount: number; currency: string; beneficiaries: string[] }) {
+    return this.http.post<{ totalCount: number; batchId: number }>(`/payments/batches`, body);
+  }
+  createBatchFromCycle(cycleId: number, programId: number) {
+    return this.http.post<{ totalCount: number; batchId: number; existing?: boolean }>(`/payments/batches/from-cycle?cycleId=${cycleId}&programId=${programId}`, {});
+  }
+  listBatches() { return this.http.get<PaymentBatch[]>(`/payments/batches`); }
+  getBatch(id: number) { return this.http.get<{ batch: PaymentBatch; instructions: PaymentInstruction[] }>(`/payments/batches/${id}`); }
+  dispatch(id: number) { return this.http.post<{status: string}>(`/payments/batches/${id}/dispatch`, {}); }
+}

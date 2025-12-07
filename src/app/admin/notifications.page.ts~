@@ -1,0 +1,49 @@
+import { Component } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { NotificationsApi, NotificationDto} from "../api/notififcations.api";
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, DatePipe, MatButtonModule, MatIconModule],
+  template: `
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-xl font-semibold">System Notifications (Admin)</h2>
+      <div class="flex gap-2">
+        <button mat-stroked-button (click)="refresh()">Refresh</button>
+        <button mat-raised-button color="primary" (click)="markAll()">Mark all read</button>
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <div *ngFor="let n of items" class="border rounded p-3 bg-white">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold">
+            {{ n.title }}
+            <span *ngIf="n.status==='UNREAD'" class="ml-2 text-[10px] bg-indigo-600/10 text-indigo-700 rounded px-1.5 py-0.5">NEW</span>
+          </div>
+          <div class="text-xs text-gray-500">{{ n.createdAt | date:'short' }}</div>
+        </div>
+        <div class="text-sm mt-1">{{ n.message || '—' }}</div>
+        <div class="text-[11px] text-gray-500 mt-1" *ngIf="n.dataJson">data: {{ n.dataJson }}</div>
+
+        <div class="mt-2 flex gap-2">
+          <button mat-button (click)="markRead(n)" [disabled]="n.status==='READ'">Mark read</button>
+          <button mat-button color="warn" (click)="remove(n)">Delete</button>
+        </div>
+      </div>
+
+      <div class="text-sm text-gray-600" *ngIf="!items.length">No notifications.</div>
+    </div>
+  `
+})
+export class AdminNotificationsPage {
+  items: NotificationDto[] = [];
+  constructor(private api: NotificationsApi) {}
+  ngOnInit() { this.refresh(); }
+  refresh() { this.api.me('ADMIN').subscribe(x => this.items = x.sort((a,b) => a.createdAt < b.createdAt ? 1 : -1)); }
+  markAll() { this.api.markAllRead('ADMIN').subscribe(() => this.refresh()); }
+  markRead(n: NotificationDto) { this.api.markRead(n.id).subscribe(() => this.refresh()); }
+  remove(n: NotificationDto) { this.api.remove(n.id).subscribe(() => this.refresh()); }
+}

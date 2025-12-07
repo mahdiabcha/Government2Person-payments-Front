@@ -1,0 +1,12 @@
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-generate-entitlements.dialog',
+  standalone: true,
+  imports: [],
+  templateUrl: './generate-entitlements.dialog.component.html',
+  styleUrl: './generate-entitlements.dialog.component.scss'
+})
+export class GenerateEntitlementsDialogComponent {
+
+}

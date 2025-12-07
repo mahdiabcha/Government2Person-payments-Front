@@ -1,0 +1,23 @@
+import { HttpInterceptorFn } from '@angular/common/http';
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem('jwt') || '';
+  const username = localStorage.getItem('username') || '';
+  const roles = JSON.parse(localStorage.getItem('roles') || '[]') as string[];
+
+  // let auth and signup go through without JWT to avoid loops
+  const isAuthCall = req.url.startsWith('/auth/');
+
+  if (!token || isAuthCall) {
+    return next(req);
+  }
+
+  const setHeaders: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+  if (username) setHeaders['X-Auth-User'] = username;
+  if (roles?.length) setHeaders['X-Auth-Roles'] = roles.join(',');
+
+  // Important: do not set Content-Type for FormData; browser will do it with boundary
+  return next(req.clone({ setHeaders }));
+};

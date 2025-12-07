@@ -1,0 +1,71 @@
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NotificationsApi, Notification } from 'src/app/core/api/notifications.api';
+import { Subscription, interval } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-notifications-bell',
+  templateUrl: './notifications-bell.component.html',
+  standalone: true,
+  styleUrls: ['./notifications-bell.component.scss']
+})
+export class NotificationsBellComponent implements OnInit, OnDestroy {
+  open = false;
+  loading = false;
+  notifications: Notification[] = [];
+  unreadCount = 0;
+
+  private sub?: Subscription;
+
+  constructor(private api: NotificationsApi) {}
+
+  ngOnInit(): void {
+    this.load();
+    // poll every 30s
+    this.sub = interval(30000).pipe(switchMap(() => this.api.listMe()))
+      .subscribe(list => this.setList(list));
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  toggle() {
+    this.open = !this.open;
+    if (this.open) this.load();
+  }
+
+  load() {
+    this.loading = true;
+    this.api.listMe().subscribe({
+      next: (list) => this.setList(list),
+      error: () => (this.loading = false),
+      complete: () => (this.loading = false)
+    });
+  }
+
+  private setList(list: Notification[]) {
+    this.notifications = list;
+    this.unreadCount = list.filter(n => n.status === 'UNREAD').length;
+  }
+
+  markAsRead(n: Notification, event?: MouseEvent) {
+    if (event) event.stopPropagation();
+    if (n.status === 'UNREAD') {
+      this.api.markRead(n.id).subscribe(() => {
+        n.status = 'READ';
+        this.unreadCount = Math.max(0, this.unreadCount - 1);
+      });
+    }
+  }
+
+  markAllAsRead(event: MouseEvent) {
+    event.stopPropagation();
+    const ids = this.notifications.filter(n => n.status === 'UNREAD').map(n => n.id);
+    if (ids.length === 0) return;
+    this.api.markReadBulk(ids).subscribe(() => {
+      this.notifications.forEach(n => (n.status = 'READ'));
+      this.unreadCount = 0;
+    });
+  }
+}

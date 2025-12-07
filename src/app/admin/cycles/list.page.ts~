@@ -1,0 +1,54 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ProgramsApi, Cycle } from '../../api/programs.api';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink, MatButtonModule, MatSnackBarModule],
+  template: `
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-xl font-semibold">Cycles of Program #{{ programId }}</h2>
+      <button mat-raised-button color="primary" (click)="create()" [disabled]="creating">{{ creating ? 'Creating…' : 'Create cycle' }}</button>
+    </div>
+
+    <table class="min-w-full text-sm">
+      <thead><tr class="border-b"><th class="p-2 text-left">#</th><th class="p-2 text-left">Name</th><th class="p-2">State</th><th class="p-2">Dates</th><th class="p-2">Action</th></tr></thead>
+      <tbody>
+      <tr *ngFor="let c of items" class="border-b">
+        <td class="p-2">#{{ c.id }}</td>
+        <td class="p-2">{{ c.name }}</td>
+        <td class="p-2">{{ c.state }}</td>
+        <td class="p-2">{{ c.startDate }} → {{ c.endDate }}</td>
+        <td class="p-2"><a routerLink="/admin/cycles/{{c.id}}" class="text-indigo-600 hover:underline">Open</a></td>
+      </tr>
+      </tbody>
+    </table>
+  `,
+})
+export class AdminCyclesListPage {
+  programId = Number(this.route.snapshot.paramMap.get('id'));
+  items: Cycle[] = [];
+  creating = false;
+
+  constructor(private route: ActivatedRoute, private api: ProgramsApi, private snack: MatSnackBar) {}
+  ngOnInit() { this.refresh(); }
+  refresh() { this.api.listCycles(this.programId).subscribe(x => this.items = x); }
+
+  create() {
+    if (this.creating) return;
+    const name = (prompt('Cycle name?') || '').trim(); if (!name) { this.snack.open('Name is required.', 'Close', { duration: 1500 }); return; }
+    const startDate = (prompt('Start date (YYYY-MM-DD)?') || '').trim();
+    const endDate = (prompt('End date (YYYY-MM-DD)?') || '').trim();
+    if (!startDate || !endDate) { this.snack.open('Start and end dates are required.', 'Close', { duration: 1800 }); return; }
+
+    this.creating = true;
+    this.api.createCycle(this.programId, { name, startDate, endDate }).subscribe({
+      next: () => { this.snack.open('Cycle created', 'Close', { duration: 1500 }); this.creating = false; this.refresh(); },
+      error: () => { this.creating = false; }
+    });
+  }
+}

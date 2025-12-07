@@ -1,0 +1,244 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { EnrollmentApi, MyEnrollment } from '../api/enrollment.api';
+
+type Status = MyEnrollment['status'] | 'ALL';
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  styles: [`
+    :host { display:block; }
+    .hero {
+      position: relative;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      background:
+        radial-gradient(1200px 200px at 0% -20%, rgba(37,99,235,.10), transparent 60%),
+        radial-gradient(1200px 200px at 100% 120%, rgba(16,185,129,.10), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.02), transparent);
+      border: 1px solid rgba(0,0,0,.06);
+      margin-bottom: 1rem;
+    }
+    .muted { color:#6b7280; }
+
+    .controls .control {
+      border: 1px solid rgba(0,0,0,.10);
+      border-radius: .6rem;
+      padding: .5rem .65rem;
+      background: white;
+      font-size: .9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: .85rem;
+      overflow: hidden;
+      background: white;
+    }
+    thead { background: #f9fafb; }
+    th { font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:#6b7280; }
+    th, td { padding: .75rem; border-bottom: 1px solid rgba(0,0,0,.06); }
+    tbody tr:hover { background: rgba(0,0,0,.02); }
+
+    .badge {
+      display: inline-flex; align-items:center; gap:.35rem;
+      padding: .2rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 600;
+    }
+    .b-pending  { background: rgba(245,158,11,.14); color: rgb(180,83,9); }
+    .b-approved { background: rgba(16,185,129,.16); color: rgb(4,120,87); }
+    .b-rejected { background: rgba(239,68,68,.16); color: rgb(185,28,28); }
+    .b-canceled { background: rgba(107,114,128,.16); color: rgb(55,65,81); }
+
+    .btn-link { color: rgb(37,99,235); font-weight: 600; }
+    .btn-link:hover { text-decoration: underline; }
+
+    /* Loading skeleton rows (5 cols now) */
+    .skeleton-row td { padding:.9rem .75rem; }
+    .sk {
+      height: 12px; border-radius: 6px;
+      background: linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);
+      background-size: 400% 100%; animation: shimmer 1.1s infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
+
+    .empty {
+      border: 1px dashed rgba(0,0,0,.15);
+      border-radius: 1rem; padding: 2rem; text-align: center; background: #fcfcfd;
+    }
+
+    @media (max-width: 640px) {
+      thead { display:none; }
+      table, tbody, tr, td { display:block; width:100%; }
+      tr { border-bottom: 1px solid rgba(0,0,0,.06); }
+      td { border: none; border-bottom: 1px solid rgba(0,0,0,.06); }
+      td:last-child { border-bottom:none; }
+      td::before {
+        content: attr(data-label);
+        display:block; font-size:.72rem; text-transform:uppercase; color:#6b7280; margin-bottom:.15rem;
+      }
+    }
+  `],
+  template: `
+    <!-- Header / Controls -->
+    <div class="hero">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-semibold leading-tight">My Enrollments</h2>
+          <p class="text-sm muted">Track the status of your submitted applications.</p>
+        </div>
+        <div class="controls flex flex-col sm:flex-row gap-2">
+          <input class="control" placeholder="Search by program name or reason…"
+                 [(ngModel)]="q" (ngModelChange)="applyFilters()"/>
+          <select class="control" [(ngModel)]="status" (ngModelChange)="applyFilters()">
+            <option value="ALL">All statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+            <option value="CANCELED">Canceled</option>
+          </select>
+          <select class="control" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+            <option value="new">Newest first</option>
+            <option value="old">Oldest first</option>
+          </select>
+          <button class="control" (click)="exportCsv()" [disabled]="!items.length">Export CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <table *ngIf="loading">
+      <tbody>
+      <tr class="skeleton-row" *ngFor="let _ of placeholders">
+        <td><div class="sk" style="width:220px"></div></td>
+        <td><div class="sk" style="width:100px"></div></td>
+        <td><div class="sk" style="width:180px"></div></td>
+        <td><div class="sk" style="width:160px"></div></td>
+        <td><div class="sk" style="width:90px"></div></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Table -->
+    <ng-container *ngIf="!loading && items.length">
+      <table>
+        <thead>
+        <tr>
+          <th class="text-left">Program</th>
+          <th class="text-left">Status</th>
+          <th class="text-left">Reason</th>
+          <th class="text-left">Created</th>
+          <th class="text-right pr-4">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let e of items; trackBy: track" class="border-b">
+          <td data-label="Program">{{ programName(e) }}</td>
+          <td data-label="Status">
+              <span class="badge"
+                    [ngClass]="{
+                      'b-pending': e.status==='PENDING',
+                      'b-approved': e.status==='APPROVED',
+                      'b-rejected': e.status==='REJECTED',
+                      'b-canceled': e.status==='CANCELED'
+                    }">
+                {{ e.status }}
+              </span>
+          </td>
+          <td data-label="Reason">{{ e.eligibilityReason || '—' }}</td>
+          <td data-label="Created">{{ e.createdAt | date:'medium' }}</td>
+          <td data-label="Action" class="text-right">
+            <a class="btn-link" routerLink="/citizen/programs/{{e.programId}}">Open →</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </ng-container>
+
+    <!-- Empty -->
+    <div *ngIf="!loading && !items.length" class="empty">
+      <div class="text-lg font-medium mb-1">No enrollments yet</div>
+      <div class="muted text-sm">Browse active programs and apply to see them here.</div>
+    </div>
+  `,
+})
+export class EnrollmentsPage {
+  all: MyEnrollment[] = [];
+  items: MyEnrollment[] = [];
+  loading = true;
+
+  q = '';
+  status: Status = 'ALL';
+  sortBy: 'new' | 'old' = 'new';
+
+  placeholders = Array.from({ length: 6 });
+
+  constructor(private api: EnrollmentApi) {}
+
+  ngOnInit() {
+    this.api.my().subscribe(list => {
+      this.all = list || [];
+      this.loading = false;
+      this.applyFilters();
+    });
+  }
+
+  // Prefer a real name if the API provides it; otherwise fall back to "#<id>"
+  programName(e: MyEnrollment): string {
+    const anyE: any = e as any;
+    return (
+      anyE.programName ||
+      anyE.program?.name ||
+      anyE.programTitle ||
+      anyE.program_label ||
+      `#${e.programId}`
+    );
+  }
+
+  applyFilters() {
+    const q = this.q.trim().toLowerCase();
+    let out = [...this.all];
+
+    if (this.status !== 'ALL') {
+      out = out.filter(e => e.status === this.status);
+    }
+    if (q) {
+      out = out.filter(e =>
+        this.programName(e).toLowerCase().includes(q) ||
+        ((e.eligibilityReason || '').toLowerCase().includes(q))
+      );
+    }
+    out.sort((a,b) => {
+      const ta = new Date(a.createdAt as any).getTime() || 0;
+      const tb = new Date(b.createdAt as any).getTime() || 0;
+      return this.sortBy === 'new' ? (tb - ta) : (ta - tb);
+    });
+
+    this.items = out;
+  }
+
+  exportCsv() {
+    const rows = [
+      ['Program','Status','Reason','Created'],
+      ...this.items.map(e => [
+        this.programName(e),
+        e.status,
+        (e.eligibilityReason || '').replace(/\r?\n/g, ' '),
+        new Date(e.createdAt as any).toISOString()
+      ])
+    ];
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'enrollments.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  track = (_: number, e: MyEnrollment) => e?.id ?? _;
+}

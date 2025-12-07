@@ -1,0 +1,70 @@
+import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { tap, of, Observable } from 'rxjs';
+
+interface LoginRequest { username: string; password: string; }
+interface AuthResponse { token: string; }
+interface MeResponse { username: string; roles: string[]; }
+export type SignupRole = 'CITIZEN'|'AGENT';
+interface SignupRequest { username: string; password: string; nationalId: string; role: SignupRole; }
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  // ✅ reactive source of truth
+  private jwt = signal(localStorage.getItem('jwt') || '');
+
+  roles = signal<string[]>(JSON.parse(localStorage.getItem('roles') || '[]'));
+  username = signal(localStorage.getItem('username') || '');
+
+  // ✅ recomputes when jwt() changes
+  loggedIn = computed(() => !!this.jwt());
+
+  constructor(private http: HttpClient) {}
+
+  private setToken(tok: string | null) {
+    if (tok) {
+      localStorage.setItem('jwt', tok);
+      this.jwt.set(tok);
+    } else {
+      localStorage.removeItem('jwt');
+      this.jwt.set('');
+    }
+  }
+
+  login(req: LoginRequest) {
+    return this.http.post<AuthResponse>('/auth/login', req).pipe(
+      tap(res => this.setToken(res.token)),
+      tap(() => this.refreshMe().subscribe())
+    );
+  }
+
+  signup(req: SignupRequest) {
+    return this.http.post<void>('/auth/register', req);
+  }
+
+  refreshMe(): Observable<MeResponse> {
+    return this.http.get<MeResponse>('/auth/me').pipe(
+      tap(me => {
+        localStorage.setItem('roles', JSON.stringify(me.roles));
+        localStorage.setItem('username', me.username);
+        this.roles.set(me.roles);
+        this.username.set(me.username);
+      })
+    );
+  }
+
+  // Optional helper used by guards if you added it
+  ensureMeLoaded() {
+    if (!this.loggedIn()) return of(true);
+    if (this.roles().length) return of(true);
+    return this.refreshMe();
+  }
+
+  clear() {
+    this.setToken(null);
+    localStorage.removeItem('roles');
+    localStorage.removeItem('username');
+    this.roles.set([]);
+    this.username.set('');
+  }
+}

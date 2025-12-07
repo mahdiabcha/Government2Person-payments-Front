@@ -1,0 +1,71 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { PaymentsApi, PaymentBatch } from '../../api/payments.api';
+import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, RouterLink, MatButtonModule, FormsModule],
+  template: `
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-xl font-semibold">Payment Batches</h2>
+      <div class="flex gap-2">
+        <button mat-stroked-button (click)="openManual()">Create manual</button>
+        <button mat-raised-button color="primary" (click)="openFromCycle()">From cycle</button>
+      </div>
+    </div>
+
+    <table class="min-w-full text-sm">
+      <thead>
+      <tr class="border-b">
+        <th class="p-2 text-left">#</th>
+        <th class="p-2">Program</th>
+        <th class="p-2">Cycle</th>
+        <th class="p-2">Status</th>
+        <th class="p-2">Totals</th>
+        <th class="p-2">Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let b of items" class="border-b">
+        <td class="p-2">#{{ b.id }}</td>
+        <td class="p-2">{{ b.programId ?? '—' }}</td>
+        <td class="p-2">{{ b.cycleId ?? '—' }}</td>
+        <td class="p-2">{{ b.status }}</td>
+        <td class="p-2">
+          {{ (b.successCount ?? 0) }}/{{ (b.totalCount ?? 0) }}
+          (failed: {{ (b.failedCount ?? 0) }})
+        </td>
+        <td class="p-2">
+          <a routerLink="/admin/payments/batches/{{ b.id }}" class="text-indigo-600 hover:underline">Open</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  `,
+})
+export class AdminBatchesListPage {
+  items: PaymentBatch[] = [];
+  constructor(private api: PaymentsApi) {}
+  ngOnInit() { this.refresh(); }
+  refresh() { this.api.listBatches().subscribe(x => this.items = x); }
+
+  openManual() {
+    const programId = Number(prompt('programId?') ?? '0'); if (!programId) return;
+    const amount = Number(prompt('amount?') ?? '0'); if (!amount) return;
+    const currency = (prompt('currency? (e.g., TND)') ?? 'TND').toUpperCase();
+    const beneficiaries = (prompt('Beneficiaries CSV (user1,user2,...)') ?? '')
+      .split(',').map(x => x.trim()).filter(Boolean);
+    this.api.createManualBatch({ programId, amount, currency, beneficiaries })
+      .subscribe(() => this.refresh());
+  }
+
+  openFromCycle() {
+    const programId = Number(prompt('programId?') ?? '0');
+    const cycleId = Number(prompt('cycleId?') ?? '0');
+    if (!programId || !cycleId) return;
+    this.api.createBatchFromCycle(cycleId, programId).subscribe(() => this.refresh());
+  }
+}

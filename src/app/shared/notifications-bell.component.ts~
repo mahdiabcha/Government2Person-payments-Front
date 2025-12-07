@@ -1,0 +1,34 @@
+import { Component, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { NotificationsApi } from '../api/notifications.api';
+import { interval, Subscription } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+
+@Component({
+  selector: 'app-notif-bell',
+  standalone: true,
+  imports: [CommonModule, RouterLink, MatButtonModule],
+  template: `
+    <a routerLink="/notifications" class="inline-flex items-center gap-2">
+      <button mat-stroked-button>
+        🔔 <span *ngIf="count>0" class="ml-1 text-sm font-semibold">{{ count }}</span>
+      </button>
+    </a>
+  `,
+})
+export class NotificationBellComponent implements OnDestroy {
+  count = 0;
+  private sub?: Subscription;
+
+  constructor(private api: NotificationsApi) {}
+  ngOnInit() {
+    this.tick();
+    this.sub = interval(10000).subscribe(() => this.tick()); // every 10s
+  }
+  ngOnDestroy() { this.sub?.unsubscribe(); }
+
+  private tick() {
+    this.api.count().subscribe(r => this.count = r?.new ?? 0);
+  }
+}

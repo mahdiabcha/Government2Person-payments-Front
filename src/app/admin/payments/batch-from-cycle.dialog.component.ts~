@@ -1,0 +1,36 @@
+import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import {types} from "sass";
+import
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+  template: `
+    <h2 class="text-lg font-semibold mb-3">Create batch from cycle</h2>
+    <div class="grid gap-3">
+      <mat-form-field appearance="outline"><mat-label>Program ID</mat-label><input matInput type="number" [(ngModel)]="programId"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Cycle ID</mat-label><input matInput type="number" [(ngModel)]="cycleId"></mat-form-field>
+    </div>
+    <div class="flex gap-2 justify-end mt-2">
+      <button mat-button (click)="ref.close()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="ref.close({ programId: Number(programId), cycleId: Number(cycleId) })" [disabled]="!programId || !cycleId">Create</button>
+    </div>
+  `
+})
+export class BatchFromCycleDialog {
+  programId?: number;
+  cycleId?: number;
+
+  constructor(public ref: MatDialogRef<BatchFromCycleDialog>, @Inject(MAT_DIALOG_DATA) public data: any) {
+    if (data?.programId) this.programId = data.programId;
+    if (data?.cycleId) this.cycleId = data.cycleId;
+  }
+
+
+}

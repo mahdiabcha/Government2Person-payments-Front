@@ -1,0 +1,52 @@
+// src/app/app.routes.ts
+import { Routes, CanActivateFn, ActivatedRouteSnapshot, Router, UrlTree } from '@angular/router';
+import { inject } from '@angular/core';
+import { map, Observable, of } from 'rxjs';
+import { AuthService } from './core/auth.service';
+
+export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const required = (route.data?.['roles'] ?? []) as string[];
+
+  const ensure$ = auth.loggedIn() ? auth.ensureMeLoaded() : of(true);
+  return ensure$.pipe(
+    map(() => required.every(r => auth.roles().includes(r)) ? true : router.parseUrl('/login'))
+  );
+};
+
+export const routes: Routes = [
+  { path: 'login', loadComponent: () => import('./auth/login.page').then(m => m.LoginPage) },
+  { path: 'signup', loadComponent: () => import('./auth/signup.component').then(m => m.SignupPage) },
+  {
+    path: 'citizen',
+    canActivate: [roleGuard], data: { roles: ['CITIZEN'] },
+    children: [
+      { path: '', redirectTo: 'catalog', pathMatch: 'full' },
+      { path: 'profile', loadComponent: () => import('./citizen/profile.page').then(m => m.ProfilePage) },
+      { path: 'documents', loadComponent: () => import('./citizen/documents.page').then(m => m.DocumentsPage) },
+      { path: 'catalog', loadComponent: () => import('./citizen/catalog.page').then(m => m.CatalogPage) },
+      { path: 'programs/:id', loadComponent: () => import('./citizen/program-detail.page').then(m => m.ProgramDetailPage) },
+      { path: 'enrollments', loadComponent: () => import('./citizen/enrollments.page').then(m => m.EnrollmentsPage) },
+      { path: 'notifications', loadComponent: () => import('./shared/notifications.page').then(m => m.NotificationsPage) },
+
+    ]
+  },
+  {
+    path: 'admin',
+    canActivate: [roleGuard], data: { roles: ['ADMIN'] },
+    children: [
+      { path: '', redirectTo: 'programs', pathMatch: 'full' },
+      { path: 'programs', loadComponent: () => import('./admin/programs/list.page').then(m => m.AdminProgramsListPage) },
+      { path: 'programs/:id', loadComponent: () => import('./admin/programs/detail.page').then(m => m.AdminProgramDetailPage) },
+      { path: 'programs/:id/cycles', loadComponent: () => import('./admin/cycles/list.page').then(m => m.AdminCyclesListPage) },
+      { path: 'cycles/:cycleId', loadComponent: () => import('./admin/cycles/detail.page').then(m => m.AdminCycleDetailPage) },
+      { path: 'payments/batches', loadComponent: () => import('./admin/payments/batches-list.page').then(m => m.AdminBatchesListPage) },
+      { path: 'payments/batches/:id', loadComponent: () => import('./admin/payments/batch-detail.page').then(m => m.AdminBatchDetailPage) },
+      { path: 'notifications', loadComponent: () => import('./shared/notifications.page').then(m => m.NotificationsPage) },
+
+    ]
+  },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' },
+];

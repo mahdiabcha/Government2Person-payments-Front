@@ -1,0 +1,46 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ProgramsApi, Program } from '../../api/programs.api';
+import { RouterLink, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, RouterLink, FormsModule, MatButtonModule, MatSnackBarModule],
+  template: `
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-xl font-semibold">Programs</h2>
+      <button mat-raised-button color="primary" (click)="create()">Create</button>
+    </div>
+
+    <table class="min-w-full text-sm">
+      <thead><tr class="border-b"><th class="text-left p-2">#</th><th class="text-left p-2">Name</th><th class="p-2">State</th><th class="p-2">Actions</th></tr></thead>
+      <tbody>
+      <tr *ngFor="let p of items" class="border-b">
+        <td class="p-2">#{{ p.id }}</td>
+        <td class="p-2">{{ p.name }}</td>
+        <td class="p-2">{{ p.state }}</td>
+        <td class="p-2">
+          <a routerLink="/admin/programs/{{p.id}}" class="text-indigo-600 hover:underline">Open</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  `,
+})
+export class AdminProgramsListPage {
+  items: Program[] = [];
+  constructor(private api: ProgramsApi, private router: Router, private snack: MatSnackBar) {}
+  ngOnInit() { this.refresh(); }
+  refresh() { this.api.listPrograms().subscribe(x => this.items = x); }
+
+  create() {
+    const name = prompt('Program name?'); if (!name) return;
+    this.api.createProgram({ name, description: '' }).subscribe(p => {
+      this.snack.open('Program created. Define eligibility rules before activating.', 'Close', { duration: 2500 });
+      this.router.navigate(['/admin/programs', p.id]);
+    });
+  }
+}

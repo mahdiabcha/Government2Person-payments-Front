@@ -1,0 +1,30 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface Notification {
+  id: number;
+  audience: string;
+  username?: string;
+  type: string;
+  title: string;
+  message?: string;
+  dataJson?: string;
+  status: string;
+  createdAt: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class NotificationsApi {
+  private base = '/notifications';
+
+  constructor(private http: HttpClient) {}
+
+  listMe(): Observable<Notification[]> {
+    return this.http.get<Notification[]>(`${this.base}/me`);
+  }
+
+  markRead(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${id}/read`, {});
+  }
+}

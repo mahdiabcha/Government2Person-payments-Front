@@ -1,0 +1,64 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../core/auth.service';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+
+@Component({
+  standalone: true,
+  selector: 'app-login',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSnackBarModule, RouterLink],
+  template: `
+    <div class="flex items-center justify-center min-h-[80vh] bg-slate-50">
+      <mat-card class="w-full max-w-md">
+        <h2 class="text-xl font-semibold mb-1">Welcome back</h2>
+        <div class="text-sm text-gray-600 mb-4">OpenG2P Portal</div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <mat-form-field appearance="outline" class="w-full mb-3">
+            <mat-label>Username</mat-label>
+            <input matInput formControlName="username" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full mb-4">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password" />
+          </mat-form-field>
+          <button mat-raised-button color="primary" class="w-full" [disabled]="form.invalid || loading">
+            {{ loading ? 'Signing in…' : 'Login' }}
+          </button>
+        </form>
+
+        <div class="text-sm mt-4 text-center">
+          Don’t have an account?
+          <a routerLink="/signup" class="text-emerald-700 font-medium hover:underline">Register here</a>
+        </div>
+      </mat-card>
+    </div>
+  `,
+})
+export class LoginPage {
+  form = this.fb.group({ username: ['', Validators.required], password: ['', Validators.required] });
+  loading = false;
+
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private snack: MatSnackBar) {}
+
+  submit() {
+    if (this.form.invalid || this.loading) return;
+    this.loading = true;
+    this.auth.login(this.form.value as any).subscribe({
+      next: () => {
+        const roles = JSON.parse(localStorage.getItem('roles') || '[]');
+        this.snack.open('Welcome!', 'Close', { duration: 1200 });
+        if (roles.includes('ADMIN')) this.router.navigateByUrl('/admin/programs');
+        else this.router.navigateByUrl('/citizen/catalog');
+        this.loading = false;
+      },
+      error: () => { this.loading = false; } // error messages handled by interceptor
+    });
+  }
+}
